@@ -1,2 +1,7 @@
-package ru.alishev.library.controller;public class BooksController {
+package ru.alishev.library.controller;
+
+import org.springframework.stereotype.Controller;
+
+@Controller
+public class BooksController {
 }
