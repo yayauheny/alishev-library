@@ -6,8 +6,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.alishev.library.entity.Book;
 import ru.alishev.library.entity.Person;
+import ru.alishev.library.mapper.BookRowMapper;
+import ru.alishev.library.mapper.PersonRowMapper;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
@@ -15,11 +19,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Component
-public class PersonDao implements CrudRepository<Integer, Person> {
+public class PersonDao implements PersonRepository<Integer, Person> {
 
     private final JdbcTemplate jdbcTemplate;
-//    private final BeanPropertyRowMapper<Person> personMapper = new BeanPropertyRowMapper<>(Person.class);
-    PersonRowMapper personMapper = new PersonRowMapper();
+    private final PersonRowMapper personMapper = new PersonRowMapper();
     private static final String FIND_ALL = """
             SELECT * FROM reader;
             """;
@@ -39,6 +42,10 @@ public class PersonDao implements CrudRepository<Integer, Person> {
     private static final String DELETE = """
             DELETE FROM reader
              WHERE id=?;
+            """;
+    private static final String FIND_BOOKS = """
+            SELECT * FROM book
+            WHERE reader_fk=?;
             """;
 
     @Autowired
@@ -64,7 +71,7 @@ public class PersonDao implements CrudRepository<Integer, Person> {
         int rowsAffected = jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(SAVE, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, person.getFullName());
-            ps.setString(2, person.getBirthdayDate().toString());
+            ps.setDate(2, person.getBirthdayDate());
             return ps;
         }, keyHolder);
 
@@ -77,13 +84,18 @@ public class PersonDao implements CrudRepository<Integer, Person> {
     }
 
     @Override
-    public void update(Person person) {
-        jdbcTemplate.update(UPDATE, person.getFullName(), person.getBirthdayDate(), person.getId());
+    public void update(Integer id, Person person) {
+        jdbcTemplate.update(UPDATE, person.getFullName(), person.getBirthdayDate(), id);
     }
 
     @Override
     public boolean delete(Integer id) {
         int deleted = jdbcTemplate.update(DELETE, id);
         return deleted > 0;
+    }
+
+    @Override
+    public List<Book> findBooks(Integer id) {
+        return jdbcTemplate.query(FIND_BOOKS, new BookRowMapper(), id);
     }
 }

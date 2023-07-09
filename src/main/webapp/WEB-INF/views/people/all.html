@@ -6,9 +6,13 @@
 </head>
 <body>
 <div th:each="person : ${people}">
-    <a th:ref="@{/people/{id}(id=${person.id})}" th:text="${person.fullName + ', ' + person.birthdayDate}"/>
+    <a th:href="@{/people/{id}(id=${person.id})}" th:text="${person.fullName + ', ' + person.birthdayDate}"/>
 </div>
 
+<br/>
+<hr/>
+
+<a th:href="@{/people/new}">Add new reader</a>
 
 </body>
 </html>

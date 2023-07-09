@@ -1,13 +1,13 @@
 package ru.alishev.library.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.alishev.library.entity.Book;
 import ru.alishev.library.entity.Person;
+import ru.alishev.library.mapper.BookRowMapper;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -19,8 +19,7 @@ import java.util.Optional;
 public class BookDao implements BookRepository<Integer, Book> {
 
     private final JdbcTemplate jdbcTemplate;
-    private final BeanPropertyRowMapper<Book> bookMapper = new BeanPropertyRowMapper<>(Book.class);
-
+    private final BookRowMapper bookMapper = new BookRowMapper();
     private static final String FIND_ALL = """
             SELECT * FROM book;
             """;
@@ -101,8 +100,8 @@ public class BookDao implements BookRepository<Integer, Book> {
     }
 
     @Override
-    public void update(Book book) {
-        jdbcTemplate.update(UPDATE, book.getTitle(), book.getAuthor(), book.getYear(), book.getId());
+    public void update(Integer id, Book book) {
+        jdbcTemplate.update(UPDATE, book.getTitle(), book.getAuthor(), book.getYear(), id);
     }
 
     @Override
